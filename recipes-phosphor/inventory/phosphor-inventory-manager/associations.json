@@ -1,0 +1,17 @@
+[
+  {
+    "path": "system/chassis",
+    "endpoints": [
+      {
+        "types": {
+          "fType": "all_sensors",
+          "rType": "chassis"
+        },
+        "paths": [
+          "/xyz/openbmc_project/sensors/temperature/tmp105_ambient"
+        ]
+      }
+    ]
+  }
+]
+
