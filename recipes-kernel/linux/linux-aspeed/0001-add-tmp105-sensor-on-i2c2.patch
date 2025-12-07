@@ -2,7 +2,7 @@ From 47555ee05f262c49a204b552ec8417209941cf00 Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <oe.patch@oe>
 Date: Thu, 20 Nov 2025 10:44:49 +0800
 Subject: [PATCH] add tmp105 sensor on i2c2
-
+Upstream-Status: Inappropriate [romulus-qemu simulation]
 ---
  arch/arm/boot/dts/aspeed/aspeed-bmc-opp-romulus.dts | 5 +++++
  1 file changed, 5 insertions(+)
