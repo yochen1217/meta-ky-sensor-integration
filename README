@@ -1,41 +1,107 @@
-This README file contains information on the contents of the meta-ky-romulus layer.
+# meta-ky-sensor-integration
 
-Please see the corresponding sections below for details.
+This project demonstrates a **full-stack OpenBMC sensor integration** by adding a **TMP105 temperature sensor** on an I2C bus, covering the complete path from **Linux kernel support** to **OpenBMC D-Bus–exposed sensor objects**, and finally retrieving temperature values via **Redfish**.
 
-Dependencies
-============
+## Repository Structure
 
-  URI: <first dependency>
-  branch: <branch name>
+```
+.
+├── conf
+│   └── layer.conf
+├── COPYING.MIT
+├── README
+└── recipes-demo
+    ├── hello-service
+    │   ├── files
+    │   │   ├── hello_service.cpp
+    │   │   ├── meson.build
+    │   │   └── xyz.openbmc_project.Demo.Hello.service
+    │   └── hello-service.bb
+    └── thermal-monitor-service
+        ├── files
+        │   ├── meson.build
+        │   ├── thermal_monitor.cpp
+        │   └── xyz.openbmc_project.ThermalMonitor.service
+        └── thermal-monitor-service.bb
 
-  URI: <second dependency>
-  branch: <branch name>
+```
 
-  .
-  .
-  .
+## Architecture
 
-Patches
-=======
+TMP105 (I2C)
+↓
+kernel I2C driver
+↓
+sysfs (/sys/class/hwmon)
+↓
+phosphor-hwmon
+↓
+D-Bus (/xyz/openbmc_project/sensors/temperature/*)
+↓
+bmcweb
+↓
+Redfish
 
-Please submit any patches against the meta-ky-romulus layer to the xxxx mailing list (xxxx@zzzz.org)
-and cc: the maintainer:
+## Key Highlights
 
-Maintainer: XXX YYYYYY <xxx.yyyyyy@zzzzz.com>
+* Applied `0001-add-tmp105-sensor-on-i2c2.patch` to register the TMP105 device via DTS
 
-Table of Contents
-=================
+* Enabled required kernel drivers via Yocto kernel configuration
 
-  I. Adding the meta-ky-romulus layer to your build
- II. Misc
+* Exposed sensor via **phosphor-hwmon**  
+
+* Created OpenBMC sensor config to publish data on **D-Bus**  
+* Integrated the sensor with **hwmon** and **phosphor-inventory-manager (PIM)** to ensure it can be discovered and reported through **Redfish APIs**
+
+* Verified sensor behavior using  Redfish
+
+* No upstream source code modification, only Yocto bbappend-based customization
 
 
-I. Adding the meta-ky-romulus layer to your build
-=================================================
 
-Run 'bitbake-layers add-layer meta-ky-romulus'
+## Verification
+### 1. Run QEMU
+```
+yc@yc-VMware-Virtual-Platform:~/openbmc$ ./qemu-system-arm \
+-M romulus-bmc -nographic \ 
+-m 256 \ 
+-drive file=~/openbmc/build/romulus/tmp/deploy/images/romulus/obmc-phosphor-image-romulus.static.mtd,format=raw,if=mtd \
+-net nic \
+-net user,hostfwd=:127.0.0.1:2222-:22,hostfwd=:127.0.0.1:2443-:443,hostfwd=udp:127.0.0.1:2623-:623,hostname=qemu \
+-device tmp105,bus=aspeed.i2c.bus.2,address=0x48 \
+-qmp unix:$PWD/qmp.sock,server,nowait    
+```
+![image](https://hackmd.io/_uploads/rJfeWHevZx.png)
 
-II. Misc
-========
 
---- replace with specific information about the meta-ky-romulus layer ---
+### 2. Modify sensor value via QEMU QOM (low-level simulation)
+![image](https://hackmd.io/_uploads/rJAOPORLZl.png)
+
+---
+
+### 3. Read sensor data from D-Bus
+
+- List sensor objects:
+`busctl tree`
+
+    ![image](https://hackmd.io/_uploads/B1nMnpBAgx.png)
+
+- Inspect sensor interface:
+`busctl introspect <service> <object-path>`
+
+    ![image](https://hackmd.io/_uploads/BJlSVd0UZl.png)
+
+- Read sensor value:
+`busctl get-property`
+
+    ![image](https://hackmd.io/_uploads/SJSCLuRU-x.png)
+    ![image](https://hackmd.io/_uploads/H1G9wOA8Zl.png)
+
+---
+
+### 4. Read temperature via Redfish
+
+![image](https://hackmd.io/_uploads/HyI-d_AIWe.png)
+
+
+
