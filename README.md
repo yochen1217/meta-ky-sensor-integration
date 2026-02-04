@@ -103,5 +103,3 @@ yc@yc-VMware-Virtual-Platform:~/openbmc$ ./qemu-system-arm \
 
 ![image](https://hackmd.io/_uploads/HyI-d_AIWe.png)
 
-
-
