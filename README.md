@@ -34,17 +34,7 @@ This project demonstrates a **full-stack OpenBMC sensor integration** by adding 
 
 ## Architecture
 
-mermaid
-graph TD
-    A[TMP105 Sensor - I2C] --> B[Linux Kernel I2C Driver]
-    B --> C[sysfs - /sys/class/hwmon]
-    C --> D[phosphor-hwmon]
-    D --> E[D-Bus - xyz.openbmc_project.sensors]
-    E --> F[bmcweb]
-    F --> G[Redfish API]
-    
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style G fill:#bbf,stroke:#333,stroke-width:2px
+TMP105 (I2C)  -->  kernel I2C driver  -->  sysfs (/sys/class/hwmon)  -->  phosphor-hwmon  -->  D-Bus (/xyz/openbmc_project/sensors/temperature/*)  -->  bmcweb  -->  Redfish
 
 ## Key Highlights
 
